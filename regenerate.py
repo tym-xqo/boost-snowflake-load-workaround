@@ -31,7 +31,6 @@ def create_adjusted_snowflake_table(tbl):
         print(f"skipping {tbl} - not in legacy boost")
         return
     db.engine(snowflake_url)
-    db.result("create schema if not exists boost_adjusted", returns="proxy")
 
     sql = f"""
     create table if not exists boost_adjusted.{tbl} as
@@ -54,6 +53,10 @@ def list_tables():
 
 
 def main():
+    db.engine(snowflake_url)
+    db.result("drop schema if exists snowflake_boost_adjusted", returns="proxy")
+    db.result("create schema if not exists snowflake_boost_adjusted", returns="proxy")
+
     tbls = list_tables()
     for tbl in tbls:
         create_adjusted_snowflake_table(tbl)

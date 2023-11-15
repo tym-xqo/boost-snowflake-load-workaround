@@ -7,7 +7,7 @@ from raw import db
 
 snowflake_url = os.getenv("SNOWFLAKE_URL")
 postgres_url = os.getenv("POSTGRES_URL")
-local_stage = "/tmp/"
+local_stage = "/disk1/pgsql/snowflake-boost-load"
 
 
 def copy_table(tbl):
