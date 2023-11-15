@@ -28,13 +28,23 @@ def list_tables():
     db.engine(snowflake_url)
     tbls_result = db.result(
         "select table_name from information_schema.tables "
-        "where table_schema = 'SNOWFLAKE_BOOST_LOAD' order by table_name"
+        "where table_schema = 'SNOWFLAKE_BOOST_ADJUSTED' order by table_name"
     )
     tbls = [tbl["table_name"] for tbl in tbls_result]
     return tbls
 
 
 def main():
+    db.engine(snowflake_url)
+    db.result("use schema snowflake_boost_adjusted")
+    db.result(
+        "create or replace file format boost_unload_csv "
+        "type = 'CSV' FIELD_DELIMITER = '|' "
+        "field_optionally_enclosed_by = '\"'; "
+    )
+    db.result(
+        "create or replace stage boost_unload_stage file_format = boost_unload_csv;"
+    )
     tbls = list_tables()
     for tbl in tbls:
         copy_table(tbl)
