@@ -18,17 +18,23 @@ def columns_from_table(tbl):
     )
     column_result = db.result(sql, tbl=tbl)
     cols = [col["column_name"] for col in column_result]
-    col_str = ", ".join(cols)
+    col_str_ = ", ".join(cols)
+    col_str = col_str_.replace(
+        "refreshed_at", "current_timestamp as refreshed_at"
+    ).replace("search_vector", "'' as search_vector")
     return col_str
 
 
 def create_adjusted_snowflake_table(tbl):
     col_str = columns_from_table(tbl)
+    if len(col_str) < 1:
+        print(f"skipping {tbl} - not in legacy boost")
+        return
     db.engine(snowflake_url)
     db.result("create schema if not exists boost_adjusted", returns="proxy")
 
     sql = f"""
-    create or replace table boost_adjusted.{tbl} as
+    create table if not exists boost_adjusted.{tbl} as
         select {col_str}
         from snowflake_boost_load.{tbl}
     """
